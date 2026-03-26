@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Broto — Inteligência Artificial & Automação</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Karla:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ─────────────────────────────────────────
+       TOKENS
+    ───────────────────────────────────────── */
+    :root {
+      --musgo:  #3B5E3A;
+      --broto:  #5A8C4E;
+      --folha:  #8DBF72;
+      --menta:  #C4DFB2;
+      --terra:  #A0622A;
+      --argila: #C9884F;
+      --areia:  #F2E8D5;
+      --creme:  #FAF6EE;
+      --void:   #0E1210;
+      --v2:     rgba(20, 26, 19, 0.95); 
+      --v3:     rgba(27, 36, 25, 0.95);
+      --v4:     rgba(34, 46, 32, 0.95);
+      --mu:     rgba(242,232,213,0.42);
+      --mu2:    rgba(242,232,213,0.20);
+      --mu3:    rgba(242,232,213,0.08);
+      --gap:    24px;
+    }
+
+    /* ─────────────────────────────────────────
+       RESET & BASE COM BACKGROUND TECH (GRID)
+    ───────────────────────────────────────── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background-color: var(--void);
+      color: var(--areia);
+      font-family: 'Karla', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background-image: 
+        linear-gradient(rgba(242, 232, 213, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(242, 232, 213, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ─────────────────────────────────────────
+       KEYFRAMES
+    ───────────────────────────────────────── */
+    @keyframes up   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+    @keyframes in   { from{opacity:0} to{opacity:1} }
+    @keyframes flt  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    @keyframes pulse-border {
+      0% { box-shadow: 0 0 0 0 rgba(141,191,114,0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(141,191,114,0); }
+      100% { box-shadow: 0 0 0 0 rgba(141,191,114,0); }
+    }
+
+    .au   { animation: up  .7s ease both }
+    .ai   { animation: in  .6s ease both }
+    .flt  { animation: flt 4s ease-in-out infinite }
+    .d1   { animation-delay:.10s }
+    .d2   { animation-delay:.22s }
+    .d3   { animation-delay:.34s }
+    .d4   { animation-delay:.46s }
+    .d5   { animation-delay:.58s }
+
+    /* ─────────────────────────────────────────
+       TYPOGRAPHY HELPERS
+    ───────────────────────────────────────── */
+    .serif  { font-family:'DM Serif Display',serif; font-weight:400; letter-spacing:-.03em; }
+    .hand   { font-family:'Caveat',cursive; font-weight:700; }
+    .caps   { font-size:11px; letter-spacing:.2em; text-transform:uppercase; font-weight:700; }
+
+    /* ─────────────────────────────────────────
+       LAYOUT UTILITIES
+    ───────────────────────────────────────── */
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
+    .flex  { display:flex; }
+    .fcol  { display:flex; flex-direction:column; }
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; position: relative; z-index: 1; }
+
+    @media (max-width: 900px) {
+      .grid2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .sec { padding: 64px 5vw !important; }
+      h1 { font-size: 3rem !important; }
+      .data-strip { flex-direction: column; gap: 24px !important; border-top:none !important; padding-top: 0 !important;}
+    }
+
+    /* ─────────────────────────────────────────
+       SECTION SHELL
+    ───────────────────────────────────────── */
+    .sec { padding: 96px 7vw; border-bottom: 1px solid var(--mu3); position: relative; }
+    .sec.light  { background:var(--areia);  color:#1A1F19; }
+    .sec.mid    { background:var(--v2); }
+    .sec.deep   { background:var(--v3); }
+    .sec.green  { background:var(--musgo); border-bottom: none;}
+
+    .sec-tag { display:flex; align-items:center; gap:14px; color:var(--folha); margin-bottom:40px; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.05em;}
+    .sec-tag::after { content:''; width:36px; height:1px; background:currentColor; display:block; }
+    .sec.light .sec-tag { color: var(--terra); }
+
+    /* ─────────────────────────────────────────
+       COMPONENTS (Buttons, Nav, FAB)
+    ───────────────────────────────────────── */
+    nav { padding: 24px 7vw; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--mu3); background: rgba(14, 18, 16, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100;}
+    
+    .logo { font-size: 2.2rem; color: var(--areia); text-decoration: none; font-weight: 400; text-transform: lowercase; font-family: 'DM Serif Display', serif;}
+    .logo-to { color: var(--folha); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 24px; font-weight: 600; text-decoration: none; border-radius: 4px; transition: 0.3s ease; cursor: pointer; border: none; font-family: 'Karla', sans-serif;}
+    .btn-outline { background: transparent; color: var(--areia); border: 1px solid var(--mu2); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;}
+    .btn-outline:hover { border-color: var(--folha); color: var(--folha); }
+    
+    /* ADDED: Button Primary for Nav */
+    .btn-primary { background: var(--folha); color: var(--void); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase;}
+    .btn-primary:hover { background: var(--menta); }
+    
+    .btn-terra { background: var(--terra); color: var(--areia); padding: 16px 32px; font-size: 1.1rem;}
+    .btn-terra:hover { background: var(--argila); transform: translateY(-2px); }
+
+    .mascote-wrapper { position: relative; width: 220px; display: flex; flex-direction: column; align-items: center; }
+    .mascote-glow { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(141,191,114,0.15) 0%, transparent 70%); z-index: -1; top: 0; border-radius: 50%; border: 1px solid rgba(141,191,114,0.1);}
+
+    /* Floating Action Buttons (FAB) */
+    .fab-container { position: fixed; bottom: 32px; right: 32px; display: flex; flex-direction: column; gap: 16px; z-index: 999; align-items: flex-end; }
+    .fab { display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--v3); border: 1px solid var(--mu2); color: var(--areia); box-shadow: 0 10px 25px rgba(0,0,0,0.5); transition: 0.3s ease; text-decoration: none; }
+    .fab:hover { transform: translateY(-4px); border-color: var(--folha); color: var(--folha); }
+    
+    .fab-primary { width: auto; padding: 0 24px; height: 56px; border-radius: 28px; background: var(--folha); color: var(--void); border: none; font-weight: 600; font-family: 'Karla', sans-serif; animation: pulse-border 2s infinite; gap: 10px;}
+    .fab-primary:hover { background: var(--menta); color: var(--void); transform: translateY(-4px); animation: none; box-shadow: 0 10px 30px rgba(141,191,114,0.3); }
+
+    /* ─────────────────────────────────────────
+       N8N-STYLE WORKFLOW (VERTICAIS DESTACADAS)
+    ───────────────────────────────────────── */
+    .workflow-wrapper {
+      display: flex; align-items: center; justify-content: flex-start; gap: 16px;
+      padding: 40px 0 20px 0; overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch;
+    }
+    .workflow-wrapper::-webkit-scrollbar { height: 6px; }
+    .workflow-wrapper::-webkit-scrollbar-track { background: var(--v2); border-radius: 4px; }
+    .workflow-wrapper::-webkit-scrollbar-thumb { background: var(--folha); border-radius: 4px; }
+
+    .wf-node {
+      background: rgba(20, 26, 19, 0.95); backdrop-filter: blur(8px);
+      border: 1px solid var(--mu2); border-radius: 8px; padding: 16px; min-width: 250px;
+      display: flex; align-items: center; gap: 16px; position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: 0.3s ease; flex-shrink: 0;
+    }
+    .wf-node:hover { transform: translateY(-4px); border-color: var(--folha); box-shadow: 0 15px 35px rgba(141,191,114,0.1); }
+    .wf-node::before {
+      content: ''; position: absolute; left: -1px; top: 10px; bottom: 10px; width: 4px;
+      background: var(--folha); border-radius: 0 4px 4px 0;
+    }
+    .wf-node.menta::before { background: var(--menta); }
+    
+    .wf-node.highlight {
+      min-width: 350px; padding: 24px; border: 1px solid rgba(141,191,114,0.4);
+      background: linear-gradient(145deg, rgba(27, 36, 25, 0.95) 0%, rgba(20, 26, 19, 0.95) 100%);
+      box-shadow: 0 15px 40px rgba(141,191,114,0.08); align-items: flex-start;
+    }
+    .wf-node.highlight:hover { border-color: var(--folha); box-shadow: 0 20px 50px rgba(141,191,114,0.2); }
+    .wf-node.highlight.terra { border-color: rgba(160,98,42,0.4); box-shadow: 0 15px 40px rgba(160,98,42,0.08); }
+    .wf-node.highlight.terra:hover { border-color: var(--terra); box-shadow: 0 20px 50px rgba(160,98,42,0.2); }
+    .wf-node.highlight::before { width: 6px; }
+    .wf-node.highlight.terra::before { background: var(--terra); }
+
+    .wf-icon {
+      width: 44px; height: 44px; border-radius: 8px; background: rgba(242,232,213,0.05);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+      border: 1px solid rgba(242,232,213,0.1); flex-shrink: 0;
+    }
+    .wf-node.highlight .wf-icon { width: 56px; height: 56px; font-size: 1.5rem; }
+
+    .wf-content h4 {
+      font-family: 'Karla', sans-serif; font-size: 0.80rem; color: var(--folha);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;
+    }
+    .wf-node.terra .wf-content h4 { color: var(--terra); }
+    .wf-node.menta .wf-content h4 { color: var(--menta); }
+    
+    .wf-content p { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--areia); line-height: 1.1; }
+    .wf-node.highlight .wf-content p { font-size: 1.6rem; margin-bottom: 8px;}
+    .wf-desc { font-family: 'Karla', sans-serif; font-size: 0.95rem; color: var(--mu); line-height: 1.5; }
+
+    .wf-dot-in, .wf-dot-out {
+      width: 10px; height: 10px; border-radius: 50%; background: var(--v2);
+      border: 2px solid var(--folha); position: absolute; top: 50%; transform: translateY(-50%);
+    }
+    .wf-dot-in { left: -6px; }
+    .wf-dot-out { right: -6px; }
+    .wf-node.terra .wf-dot-in { border-color: var(--terra); }
+    .wf-node.menta .wf-dot-in, .wf-node.menta .wf-dot-out { border-color: var(--menta); }
+    .wf-svg-conn { flex-shrink: 0; overflow: visible; }
+
+    /* ─────────────────────────────────────────
+       DETALHES DAS VERTICAIS MASSIVAS (LIGHT/AREIA)
+    ───────────────────────────────────────── */
+    .detail-panel-light {
+      background: var(--creme);
+      border: 1px solid rgba(160, 98, 42, 0.15);
+      border-radius: 24px; padding: 64px; position: relative;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.05); margin-bottom: 40px;
+    }
+    .detail-panel-light.highlight-green { border-top: 4px solid var(--folha); }
+    .detail-panel-light.highlight-terra { border-top: 4px solid var(--terra); }
+    
+    .detail-inner-grid {
+      display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; margin-top: 40px;
+    }
+    @media (max-width: 900px) {
+      .detail-panel-light { padding: 40px 24px; }
+      .detail-inner-grid { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    .info-box-light {
+      background: #ffffff; border: 1px solid rgba(0,0,0,0.06); border-radius: 12px;
+      padding: 24px; margin-bottom: 16px; transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    }
+    .info-box-light:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); border-color: rgba(141,191,114,0.3);}
+    .info-box-light.focus-green { border-left: 4px solid var(--folha); }
+    .info-box-light.focus-terra { border-left: 4px solid var(--terra); }
+    
+    .info-box-light h5 { font-size: 1.15rem; margin-bottom: 8px; color: var(--void); font-family: 'DM Serif Display', serif; letter-spacing: 0;}
+    .info-box-light p { font-size: 0.95rem; color: #555; margin: 0; line-height: 1.5; }
+
+    .vs-box-light {
+      background: #ffffff; border: 1px solid rgba(0,0,0,0.08); border-radius: 16px;
+      padding: 32px; margin-top: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    }
+    .vs-row-light { display: flex; gap: 20px; align-items: flex-start; }
+    .vs-icon-light { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; background: var(--creme); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0,0,0,0.05);}
+    .vs-divider-light { height: 1px; background: rgba(0,0,0,0.06); margin: 24px 0; width: 100%; display: block;}
+
+    .check-list-light { list-style: none; padding: 0; margin: 24px 0 0 0; }
+    .check-list-light li {
+      display: flex; align-items: flex-start; gap: 12px;
+      color: var(--void); font-size: 1.05rem; margin-bottom: 16px; line-height: 1.5;
+    }
+    .check-list-light li::before {
+      content: '✓'; color: var(--folha); font-weight: bold; font-family: sans-serif;
+      background: rgba(141,191,114,0.15); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem;
+    }
+    .check-list-light.terra li::before { color: var(--terra); background: rgba(160,98,42,0.15); }
+
+
+    /* ─────────────────────────────────────────
+       FOUNDERS SPECIFIC STYLES
+    ───────────────────────────────────────── */
+    .founder-card {
+      display: flex; align-items: center; gap: 24px;
+      background: linear-gradient(145deg, rgba(27, 36, 25, 0.95) 0%, rgba(20, 26, 19, 0.95) 100%);
+      padding: 32px; border-radius: 16px; border: 1px solid rgba(242,232,213,0.05);
+      transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .founder-card:hover {
+      border-color: rgba(141,191,114,0.3); transform: translateY(-4px); box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+    .founder-img-wrap {
+      width: 120px; height: 120px; border-radius: 50%; border: 2px solid var(--v4);
+      padding: 4px; flex-shrink: 0; transition: 0.3s ease;
+    }
+    .founder-card:hover .founder-img-wrap { border-color: var(--folha); }
+    
+    .founder-img-inner {
+      width: 100%; height: 100%; border-radius: 50%; overflow: hidden;
+      background-color: var(--v2); display: flex; align-items: center; justify-content: center;
+    }
+    .founder-img-inner img { 
+      width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; 
+    }
+    
+    .founder-links { display: flex; gap: 12px; margin-top: 16px; }
+    .founder-links a {
+      color: var(--areia); text-decoration: none; font-size: 0.8rem; font-weight: 600;
+      display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+      border: 1px solid var(--mu2); border-radius: 4px; transition: 0.3s;
+    }
+    .founder-links a:hover { border-color: var(--folha); color: var(--folha); }
+
+    @media (max-width: 768px) {
+      .founder-card { flex-direction: column; text-align: center; }
+      .founder-links { justify-content: center; }
+    }
+
+    /* ─────────────────────────────────────────
+       ROADMAP SPECIFIC STYLES
+    ───────────────────────────────────────── */
+    .text-gradient {
+      background: linear-gradient(90deg, #8DBF72 0%, #C4DFB2 50%, #A0622A 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent; display: inline-block;
+    }
+    .roadmap-section {
+      background-color: transparent; position: relative; overflow: hidden; 
+      padding: 120px 7vw; border-bottom: 1px solid rgba(242,232,213,0.08);
+    }
+    .roadmap-glow {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
+      width: 80vw; height: 500px; background: radial-gradient(circle, rgba(141,191,114,0.1) 0%, transparent 70%); 
+      z-index: 0; pointer-events: none;
+    }
+    .roadmap-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;
+      position: relative; z-index: 2; margin-top: 80px;
+    }
+    .roadmap-grid::before {
+      content: ''; position: absolute; top: 32px; left: 50px; right: 50px; height: 2px;
+      background: linear-gradient(90deg, rgba(160,98,42,0.8) 0%, rgba(141,191,114,0.8) 50%, rgba(90,140,78,0.8) 100%); z-index: -1;
+    }
+    .roadmap-card {
+      background: linear-gradient(160deg, rgba(27, 36, 25, 0.95) 0%, rgba(20,26,19,0.95) 100%);
+      backdrop-filter: blur(10px); border: 1px solid rgba(242,232,213,0.05);
+      border-top: 1px solid rgba(141,191,114,0.5); border-radius: 16px;
+      padding: 48px 32px 32px 32px; position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6); transition: all 0.4s ease; display: flex; flex-direction: column;
+    }
+    .roadmap-card:hover { transform: translateY(-8px); border-color: rgba(141,191,114,0.8); }
+    .roadmap-dot {
+      position: absolute; top: -12px; left: 32px; width: 24px; height: 24px;
+      border-radius: 50%; background: #141A13; border: 4px solid #8DBF72; transition: 0.4s ease;
+    }
+    .roadmap-card:hover .roadmap-dot { background: #8DBF72; transform: scale(1.2); box-shadow: 0 0 30px rgba(141,191,114,1); }
+    .step-bg {
+      position: absolute; right: -10px; bottom: -20px; font-size: 10rem; font-family: 'DM Serif Display', serif;
+      background: linear-gradient(180deg, rgba(242,232,213,0.08) 0%, transparent 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+      line-height: 1; z-index: 0; pointer-events: none; transition: 0.4s ease;
+    }
+    @media (max-width: 900px) {
+      .roadmap-grid { grid-template-columns: 1fr; margin-top: 40px;}
+      .roadmap-grid::before { display: none; }
+    }
+
+    /* ─────────────────────────────────────────
+       CALCULADORA DE DIAGNÓSTICO (INSERIDO)
+    ───────────────────────────────────────── */
+    .calc-box {
+      background: linear-gradient(160deg, #1B2419 0%, #0E1210 100%);
+      border: 1px solid rgba(141, 191, 114, 0.2);
+      border-radius: 24px; padding: 48px; max-width: 900px; margin: 40px auto;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    }
+    .calc-step { display: none; animation: in 0.4s ease both; }
+    .calc-step.active { display: block; }
+    .calc-title { font-size: 2.2rem; text-align: center; margin-bottom: 32px; color: var(--areia); font-family: 'DM Serif Display', serif; }
+    .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .calc-opt {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--mu3);
+      padding: 24px; border-radius: 12px; cursor: pointer; transition: 0.3s;
+      text-align: center; font-size: 1.1rem;
+    }
+    .calc-opt:hover { border-color: var(--folha); background: rgba(141,191,114,0.05); }
+    .result-card { text-align: center; padding: 40px; border: 2px dashed var(--folha); border-radius: 16px; background: rgba(141,191,114,0.03); }
+    .result-value { font-size: 4.5rem; color: #ff5252; margin: 16px 0; font-weight: 700; font-family: 'DM Serif Display', serif; }
+    @media (max-width: 600px) { .calc-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- ================= FLOATING ACTION BUTTONS (FAB) ================= -->
+  <div class="fab-container">
+    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=contatobrotoai@gmail.com" target="_blank" class="fab" title="Enviar E-mail" aria-label="Enviar E-mail">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+        <path d="M2 4l10 8 10-8"></path>
+      </svg>
+    </a>
+    
+    <a href="https://cal.com/brotoai" target="_blank" class="fab fab-primary" title="Agendar Reunião">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      Agendar Reunião
+    </a>
+  </div>
+
+  <!-- ================= NAV ================= -->
+  <nav class="ai">
+    <a href="#" class="logo serif">bro<span class="logo-to">to</span></a>
+    <div class="flex" style="gap: 12px;">
+      <a href="#diagnostico" class="btn btn-primary caps">Custo Invisível</a>
+      <a href="https://cal.com/brotoai" target="_blank" class="btn btn-outline caps">Agendar Call</a>
+    </div>
+  </nav>
+
+  <!-- ================= HERO ================= -->
+  <section class="sec mid" style="min-height: 85vh; display: flex; align-items: center;">
+    <div class="container grid2" style="align-items: center;">
+      
+      <div class="fcol">
+        <span class="caps au d1" style="color: var(--folha); margin-bottom: 24px;">— Agência de Inteligência Artificial</span>
+        
+        <h1 class="serif au d2" style="font-size: 5rem; line-height: 1.05; margin-bottom: 32px; max-width: 600px;">
+          Inteligência <br>que <span style="color: var(--folha); font-style: italic;">nasce</span> <br>no Brasil.
+        </h1>
+        
+        <p class="au d3" style="font-size: 1.15rem; color: var(--mu); max-width: 500px; margin-bottom: 40px; border-left: 2px solid var(--mu3); padding-left: 24px;">
+          Criamos ecossistemas de IA e automação para pequenas e médias empresas brasileiras. Tecnologia de verdade, com a humanidade que o mercado esqueceu de colocar.
+        </p>
+        
+        <div class="flex data-strip au d4" style="gap: 48px; border-top: 1px solid var(--mu3); padding-top: 32px;">
+          <div>
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="flex au d5" style="justify-content: center; align-items: center; height: 100%;">
+        <div class="mascote-wrapper">
+          <div class="mascote-glow"></div>
+          <svg class="flt" width="180" height="200" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15,100 C8,100 5,90 8,85" stroke="var(--areia)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M85,100 C92,100 95,90 92,85" stroke="var(--areia)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M10,95 C10,120 90,120 90,95 C90,75 60,62 50,62 C40,62 10,75 10,95 Z" fill="var(--areia)"/>
+            <circle cx="35" cy="92" r="3.5" fill="var(--void)"/>
+            <circle cx="65" cy="92" r="3.5" fill="var(--void)"/>
+            <path d="M50,62 C45,40 40,15 50,5 C60,15 55,40 50,62 Z" fill="var(--folha)"/>
+            <path d="M48,63 C35,50 20,35 25,20 C38,28 45,45 48,63 Z" fill="var(--folha)"/>
+            <path d="M52,63 C65,50 80,35 75,20 C62,28 55,45 52,63 Z" fill="var(--folha)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VERTICAIS (FLUXOGRAMA ESCURO) ================= -->
+  <section id="verticais" class="sec deep" style="border-bottom: none;">
+    <div class="container">
+      <div class="sec-tag au">Soluções e Verticais</div>
+      
+      <h2 class="serif au d1" style="font-size: 3.5rem; line-height: 1.1; max-width: 700px; margin-bottom: 16px;">
+        As duas raízes do <br>crescimento estruturado.
+      </h2>
+      <p class="au d2" style="color: var(--mu); max-width: 500px; margin-bottom: 24px;">
+        Mapeamos o comportamento do seu negócio e direcionamos a solução técnica exata através de nossas duas verticais principais.
+      </p>
+
+      <!-- Interface Workflow Visual (Apresentação Inicial) -->
+      <div class="workflow-wrapper au d3">
+        <div class="wf-node">
+           <div class="wf-dot-out"></div>
+           <div class="wf-icon">🏢</div>
+           <div class="wf-content">
+              <h4>Origem</h4>
+              <p>O Seu Negócio</p>
+           </div>
+        </div>
+        <svg class="wf-svg-conn" width="40" height="20">
+           <path d="M0,10 L30,10" stroke="var(--folha)" stroke-width="2" stroke-dasharray="4"/>
+           <polygon points="30,5 40,10 30,15" fill="var(--folha)"/>
+        </svg>
+        <div class="wf-node menta">
+           <div class="wf-dot-in"></div>
+           <div class="wf-dot-out"></div>
+           <div class="wf-icon" style="color: var(--menta); border-color: rgba(196,223,178,0.2);">⚡</div>
+           <div class="wf-content">
+              <h4>Análise Lógica</h4>
+              <p>Onde está o gargalo?</p>
+           </div>
+        </div>
+        <svg class="wf-svg-conn" width="60" height="170">
+           <path d="M0,85 C30,85 30,35 50,35" stroke="var(--folha)" fill="none" stroke-width="2" stroke-dasharray="4"/>
+           <polygon points="50,30 60,35 50,40" fill="var(--folha)"/>
+           <path d="M0,85 C30,85 30,135 50,135" stroke="var(--terra)" fill="none" stroke-width="2" stroke-dasharray="4"/>
+           <polygon points="50,130 60,135 50,140" fill="var(--terra)"/>
+        </svg>
+        <div class="fcol" style="gap: 24px;">
+           <div class="wf-node highlight">
+              <div class="wf-dot-in" style="top: 35px;"></div>
+              <div class="wf-icon">⚙️</div>
+              <div class="wf-content">
+                 <h4>Vertical 01</h4>
+                 <p>Diagnóstico & Arquitetura</p>
+                 <div class="wf-desc">O fim das tarefas manuais e repetitivas.</div>
+              </div>
+           </div>
+           <div class="wf-node highlight terra">
+              <div class="wf-dot-in" style="top: 35px;"></div>
+              <div class="wf-icon">🧠</div>
+              <div class="wf-content">
+                 <h4>Vertical 02</h4>
+                 <p>Automações & Agentes</p>
+                 <div class="wf-desc">O seu conhecimento operando sozinho.</div>
+              </div>
+           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXPLICAÇÃO DAS VERTICAIS (A QUEBRA AREIA) ================= -->
+  <section id="explicacao" class="sec light">
+    <div class="container">
+      
+      <!-- ================= DETALHAMENTO: VERTICAL 01 (AUTOMAÇÃO) ================= -->
+      <div class="detail-panel-light highlight-green au d1">
+        <div class="flex" style="align-items: center; gap: 24px; margin-bottom: 16px;">
+          <div class="wf-icon" style="width: 72px; height: 72px; font-size: 2.2rem; background: rgba(141,191,114,0.15); border-color: rgba(141,191,114,0.3); color: var(--musgo);">⚙️</div>
+          <div>
+            <span class="caps" style="color: var(--terra); margin-bottom: 8px; display: block;">Vertical 01</span>
+            <h3 class="serif" style="font-size: 3.5rem; color: var(--void); line-height: 1;">Diagnóstico & Arquitetura</h3>
+          </div>
+        </div>
+        
+        <div class="detail-inner-grid">
+          <!-- Coluna Esquerda: O Problema e a Solução -->
+          <div>
+            <p style="color: var(--void); font-size: 1.2rem; line-height: 1.6; margin-bottom: 24px; font-weight: 500;">
+              Empresas perdem centenas de horas em tarefas de baixo valor cognitivo. Copiar dados de um lado para o outro, enviar mensagens manuais de cobrança e manter dezenas de abas abertas não é escalar, é sobreviver.
+            </p>
+            <p style="color: #4A524A; font-size: 1.05rem; line-height: 1.6; margin-bottom: 32px;">
+              Não nos limitamos a "ligar ferramentas". <strong>Nós mapeamos o seu fluxo operacional e desenhamos uma infraestrutura de comunicação via APIs e Webhooks.</strong> Conectamos o seu CRM (HubSpot, Pipedrive), plataformas de pagamento (Stripe, Kiwify), Planilhas e WhatsApp. O resultado é uma empresa que opera em "plano de fundo" com zero falhas de passagem de informação.
+            </p>
+            
+            <h4 class="caps" style="color: var(--musgo); border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 8px; margin-bottom: 24px;">O que eliminamos da sua rotina:</h4>
+            <ul class="check-list-light">
+              <li><span>Fim absoluto do "Ctrl+C / Ctrl+V" entre sistemas incompatíveis.</span></li>
+              <li><span>Erros humanos no cadastro de clientes e preenchimento de propostas.</span></li>
+              <li><span>Perda de *timing* comercial (o lead recebe contato no mesmo segundo).</span></li>
+            </ul>
+          </div>
+
+          <!-- Coluna Direita: Casos de Uso -->
+          <div>
+            <h4 class="serif" style="font-size: 1.8rem; color: var(--musgo); margin-bottom: 24px;">Casos de Uso Práticos</h4>
+            
+            <div class="info-box-light focus-green">
+              <h5>🟢 Onboarding Automático de Clientes</h5>
+              <p>O cliente efetuou o pagamento? No mesmo segundo, o sistema cria a nota fiscal, gera o contrato, envia por e-mail, cria a pasta do cliente no Google Drive e envia uma mensagem de boas-vindas no WhatsApp.</p>
+            </div>
+
+            <div class="info-box-light focus-green">
+              <h5>🟢 Gestão Inteligente de Leads</h5>
+              <p>O lead preencheu o formulário no site ou Facebook Ads. Ele é automaticamente cadastrado no CRM, a equipa comercial recebe uma notificação no Slack e o WhatsApp dispara a primeira abordagem de triagem.</p>
+            </div>
+
+            <div class="info-box-light focus-green">
+              <h5>🟢 Esteira de Cobrança e Faturamento</h5>
+              <p>Fluxos invisíveis que monitorizam vencimentos. Disparamos lembretes de faturas a vencer, notificações de Pix/Boleto gerados e réguas de recuperação de carrinho abandonado sem nenhuma intervenção da sua equipa.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= DETALHAMENTO: VERTICAL 02 (IA) ================= -->
+      <div class="detail-panel-light highlight-terra au d2" style="margin-bottom: 0;">
+        <div class="flex" style="align-items: center; gap: 24px; margin-bottom: 16px;">
+          <div class="wf-icon" style="width: 72px; height: 72px; font-size: 2.2rem; background: rgba(160,98,42,0.15); border-color: rgba(160,98,42,0.3); color: var(--terra);">🧠</div>
+          <div>
+            <span class="caps" style="color: var(--terra); margin-bottom: 8px; display: block;">Vertical 02</span>
+            <h3 class="serif" style="font-size: 3.5rem; color: var(--void); line-height: 1;">Automações & Agentes</h3>
+          </div>
+        </div>
+        
+        <div class="detail-inner-grid">
+          <!-- Coluna Esquerda: O Comparativo e a Dor -->
+          <div>
+            <p style="color: var(--void); font-size: 1.2rem; line-height: 1.6; margin-bottom: 16px; font-weight: 500;">
+              O mercado tenta vender "Prompts de ChatGPT" como se fossem a solução mágica para negócios. <strong>Eles não são.</strong>
+            </p>
+            <p style="color: #4A524A; font-size: 1.05rem; line-height: 1.6;">
+              O ChatGPT padrão é uma folha em branco. Ele não conhece os seus produtos, não sabe o seu preço, não acessa o seu stock e exige que um humano perca tempo a digitar comandos todos os dias. Nós desenvolvemos <strong>Agentes Autônomos através de arquitetura RAG (Retrieval-Augmented Generation)</strong> que resolvem exatamente isso.
+            </p>
+
+            <!-- Box de Comparação Crucial -->
+            <div class="vs-box-light">
+              <div class="vs-row-light">
+                <div class="vs-icon-light" style="color: #ff5252; border-color: rgba(255,82,82,0.2);">❌</div>
+                <div>
+                  <strong style="color: var(--void); display: block; margin-bottom: 6px; font-size: 1.1rem;">O ChatGPT Genérico</strong>
+                  <p style="color: #666; font-size: 0.95rem; margin: 0;">Exige que um funcionário copie a dúvida do cliente, cole no chat, copie a resposta, corrija as "alucinações" (informações inventadas pela IA) e só depois responda ao cliente. Não é eficiente.</p>
+                </div>
+              </div>
+              
+              <div class="vs-divider-light"></div>
+              
+              <div class="vs-row-light">
+                <div class="vs-icon-light" style="color: var(--terra); border-color: rgba(160,98,42,0.3); background: rgba(160,98,42,0.1);">✅</div>
+                <div>
+                  <strong style="color: var(--void); display: block; margin-bottom: 6px; font-size: 1.1rem;">O Agente Broto</strong>
+                  <p style="color: #444; font-size: 0.95rem; margin: 0;">Nós "alimentamos" uma IA com os PDFs da sua empresa, FAQ, e tom de voz. Integramos o agente no seu WhatsApp oficial. Ele lê a dúvida do cliente, consulta os <strong>seus</strong> dados, responde instantaneamente e agenda a reunião. Sozinho.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna Direita: Casos de Uso de IA -->
+          <div>
+            <h4 class="serif" style="font-size: 1.8rem; color: var(--terra); margin-bottom: 24px;">O que a sua IA pode fazer</h4>
+            
+            <div class="info-box-light focus-terra">
+              <h5>🟠 SDR B2B (Pré-Vendas) 24 Horas</h5>
+              <p>O seu Agente de IA atende os clientes de madrugada. Ele faz as perguntas-chave para qualificar o orçamento do lead, explica os diferenciais do seu produto e, se o cliente tiver o perfil ideal, o Agente insere diretamente um convite no seu Google Agenda.</p>
+            </div>
+
+            <div class="info-box-light focus-terra">
+              <h5>🟠 Triagem de Suporte (Nível 1)</h5>
+              <p>Acabe com as dúvidas repetitivas. A IA lê o ticket do cliente, pesquisa a solução no seu manual técnico privado e resolve o problema na hora. Se for um caso muito complexo, o Agente passa o atendimento para um humano com um resumo pronto da situação.</p>
+            </div>
+
+            <div class="info-box-light focus-terra">
+              <h5>🟠 Análise de Dados e Consultoria Interna</h5>
+              <p>Integramos a IA ao seu ERP. Pode literalmente abrir um chat com o seu Agente e perguntar: <em>"Qual foi o nosso produto mais vendido na semana passada e qual a margem de lucro?"</em>. Ele cruza os dados reais e devolve o relatório escrito.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= DIAGNÓSTICO (CUSTO INVISÍVEL) ================= -->
+  <section id="diagnostico" class="sec mid">
+    <div class="container">
+      <div class="sec-tag au">ROI & Eficiência</div>
+      <h2 class="serif au d1" style="font-size: 3.5rem; text-align: center; margin-bottom: 48px;">
+        Descubra o seu <span style="color: var(--folha);">Lucro Invisível.</span>
+      </h2>
+
+      <div class="calc-box au d2" id="calcRoot">
+        <div class="calc-step active" id="step1">
+          <h3 class="calc-title">Quantas pessoas perdem tempo com tarefas manuais?</h3>
+          <div class="calc-grid">
+            <div class="calc-opt" onclick="goStep(1, 2, 'size', 3)">Até 3 pessoas</div>
+            <div class="calc-opt" onclick="goStep(1, 2, 'size', 8)">De 4 a 10 pessoas</div>
+            <div class="calc-opt" onclick="goStep(1, 2, 'size', 20)">De 11 a 30 pessoas</div>
+            <div class="calc-opt" onclick="goStep(1, 2, 'size', 50)">Mais de 30 pessoas</div>
+          </div>
+        </div>
+        <div class="calc-step" id="step2">
+          <h3 class="calc-title">Qual o faturamento mensal aproximado?</h3>
+          <div class="calc-grid">
+            <div class="calc-opt" onclick="goStep(2, 3, 'rev', 50000)">Até R$ 50k</div>
+            <div class="calc-opt" onclick="goStep(2, 3, 'rev', 200000)">R$ 50k — R$ 300k</div>
+            <div class="calc-opt" onclick="goStep(2, 3, 'rev', 700000)">R$ 300k — R$ 1M</div>
+            <div class="calc-opt" onclick="goStep(2, 3, 'rev', 1500000)">Acima de R$ 1M</div>
+          </div>
+        </div>
+        <div class="calc-step" id="step3">
+          <h3 class="calc-title">Em qual setor a Broto deve atuar?</h3>
+          <div class="calc-grid">
+            <div class="calc-opt" onclick="goStep(3, 4, 'sector', 1)">Serviços / Consultoria</div>
+            <div class="calc-opt" onclick="goStep(3, 4, 'sector', 1.2)">Infoprodutos / SaaS</div>
+            <div class="calc-opt" onclick="goStep(3, 4, 'sector', 1.1)">Varejo / E-commerce</div>
+            <div class="calc-opt" onclick="goStep(3, 4, 'sector', 1.3)">Indústria / Logística</div>
+          </div>
+        </div>
+        <div class="calc-step" id="step4">
+          <h3 class="calc-title">Qual o seu maior gargalo hoje?</h3>
+          <div class="calc-grid">
+            <div class="calc-opt" onclick="finishCalc('Atendimento')">Atendimento e Suporte</div>
+            <div class="calc-opt" onclick="finishCalc('Vendas')">Vendas e Qualificação</div>
+            <div class="calc-opt" onclick="finishCalc('Operação')">Gestão e Processos</div>
+            <div class="calc-opt" onclick="finishCalc('Financeiro')">Cobrança e Faturamento</div>
+          </div>
+        </div>
+        <div class="calc-step" id="stepResult">
+          <div class="result-card">
+            <h3 class="serif" style="font-size: 2rem;">Perda Mensal Estimada</h3>
+            <div class="result-value" id="finalValue">R$ 0,00</div>
+            <p style="max-width: 600px; margin: 0 auto 32px; color: var(--mu);">
+              Este valor representa o custo de oportunidade e tempo desperdiçado que a <strong>broto</strong> recupera para você.
+            </p>
+            <a href="https://cal.com/brotoai" target="_blank" class="btn btn-terra" style="width: 100%;">Recuperar este Lucro agora</a>
+            <button onclick="resetCalc()" style="background:none; border:none; color:var(--mu); cursor:pointer; margin-top:20px; text-decoration:underline;">Refazer Diagnóstico</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ROADMAP (MÉTODO) ================= -->
+  <section id="roadmap" class="roadmap-section">
+    <div class="roadmap-glow"></div>
+    <div class="container">
+      <div class="fcol ai d1" style="align-items: center; text-align: center;">
+        <div class="sec-tag" style="justify-content: center; margin-bottom: 24px; color: #8DBF72;">Metodologia Broto</div>
+        <h2 class="serif" style="font-size: 3.5rem; max-width: 800px; color: #F2E8D5; line-height: 1.1;">
+          Como preparamos o terreno para o seu <span class="text-gradient">negócio expandir.</span>
+        </h2>
+      </div>
+
+      <div class="roadmap-grid">
+        <div class="roadmap-card au d2">
+          <div class="roadmap-dot"></div>
+          <span class="step-bg">1</span>
+          <div style="position: relative; z-index: 1;">
+            <span class="caps" style="color: #A0622A; margin-bottom: 12px; display: block;">Diagnóstico</span>
+            <h3 class="serif" style="font-size: 2.2rem; margin-bottom: 16px; color: #F2E8D5;">Mapeamento</h3>
+            <p style="color: rgba(242,232,213,0.6);">Mapeamos os processos manuais, identificamos as perdas de tempo e desenhamos a arquitetura técnica ideal.</p>
+          </div>
+        </div>
+
+        <div class="roadmap-card au d3">
+          <div class="roadmap-dot" style="border-color: #C4DFB2;"></div>
+          <span class="step-bg">2</span>
+          <div style="position: relative; z-index: 1;">
+            <span class="caps" style="color: #C4DFB2; margin-bottom: 12px; display: block;">Implementação</span>
+            <h3 class="serif" style="font-size: 2.2rem; margin-bottom: 16px; color: #F2E8D5;">Automação</h3>
+            <p style="color: rgba(242,232,213,0.6);">As mãos na terra. Implementamos as automações e treinamos as Inteligências Artificiais no tom de voz da marca.</p>
+          </div>
+        </div>
+
+        <div class="roadmap-card au d4">
+          <div class="roadmap-dot" style="border-color: #5A8C4E;"></div>
+          <span class="step-bg">3</span>
+          <div style="position: relative; z-index: 1;">
+            <span class="caps" style="color: #5A8C4E; margin-bottom: 12px; display: block;">Escala</span>
+            <h3 class="serif" style="font-size: 2.2rem; margin-bottom: 16px; color: #F2E8D5;">Otimização</h3>
+            <p style="color: rgba(242,232,213,0.6);">Lançamento e otimização. Garantimos que a tecnologia trabalhe por si, gerando escala e mais faturamento.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FUNDADORES ================= -->
+  <section id="fundadores" class="sec mid">
+    <div class="container">
+      <div class="sec-tag au">Quem Planta</div>
+      
+      <h2 class="serif au d1" style="font-size: 3.5rem; line-height: 1.1; margin-bottom: 64px; max-width: 600px;">
+        As mentes por trás <br>da operação.
+      </h2>
+
+      <div class="grid2">
+        <!-- Yussuf Gabriel -->
+        <div class="founder-card au d2">
+          <div class="founder-img-wrap">
+            <div class="founder-img-inner">
+              <img src="yussuf.jpeg" alt="Yussuf Gabriel" style="object-position: center 60%;">
+            </div>
+          </div>
+          <div>
+            <h3 class="serif" style="font-size: 2rem; color: var(--areia); margin-bottom: 4px;">Yussuf Gabriel</h3>
+            <span class="caps" style="color: var(--terra); display: block; margin-bottom: 12px;">Co-Fundador & Estratégia</span>
+            <p style="color: var(--mu); font-size: 0.95rem;">Especialista em mapeamento de processos e estratégia de negócios. Transforma gargalos operacionais em arquiteturas eficientes e escaláveis.</p>
+            
+            <div class="founder-links">
+              
+              <a href="#" target="_blank">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Luan Oliveira -->
+        <div class="founder-card au d3">
+          <div class="founder-img-wrap">
+            <div class="founder-img-inner">
+              <img src="luan.jpeg" alt="Luan Oliveira">
+            </div>
+          </div>
+          <div>
+            <h3 class="serif" style="font-size: 2rem; color: var(--areia); margin-bottom: 4px;">Luan Oliveira</h3>
+            <span class="caps" style="color: var(--menta); display: block; margin-bottom: 12px;">Co-Fundador & Tecnologia</span>
+            <p style="color: var(--mu); font-size: 0.95rem;">Arquiteto de automações e integração de IA. O responsável técnico por fazer todos os sistemas conversarem e funcionarem no piloto automático.</p>
+            
+            <div class="founder-links">
+        
+                
+              <a href="https://www.linkedin.com/in/luan-oliveira-16437127b/" target="_blank">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA FINAL ================= -->
+  <section id="contato" class="sec green" style="padding: 120px 7vw;">
+    <div class="container grid2" style="align-items: center;">
+      <div class="au d1">
+        <h2 class="serif" style="font-size: 3.5rem; color: var(--areia); line-height: 1.1; margin-bottom: 16px;">
+          Pronto para plantar<br> a sua ideia?
+        </h2>
+        <p style="font-size: 1.1rem; color: var(--menta); max-width: 400px; margin-bottom: 40px;">
+          A estrutura do seu negócio pode ser muito mais fluida. Fale conosco e descubra o que podemos automatizar hoje.
+        </p>
+        <a href="https://cal.com/brotoai" target="_blank" class="btn btn-terra">Agendar Diagnóstico Estratégico</a>
+      </div>
+      
+      <div class="flex au d3" style="justify-content: center; align-items: center;">
+        <div style="width: 300px; height: 300px; border-radius: 50%; border: 1px solid rgba(242,232,213,0.2); display: flex; align-items: center; justify-content: center; position: relative;">
+          <div style="width: 200px; height: 200px; border-radius: 50%; background: var(--broto); opacity: 0.8; display: flex; align-items: center; justify-content: center;" class="flt">
+             <span class="serif" style="font-size: 6rem; color: var(--areia); line-height: 0;">*</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="sec void" style="padding: 40px 7vw;">
+    <div class="container flex" style="justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px;">
+      <a href="#" class="logo serif">bro<span class="logo-to">to</span></a>
+      <div class="flex" style="gap: 24px;">
+        <a href="https://www.instagram.com/broto.ia/" style="color: var(--mu2); text-decoration: none; font-size: 0.9rem;">Instagram</a>
+        <a href="#" style="color: var(--mu2); text-decoration: none; font-size: 0.9rem;">LinkedIn</a>
+      </div>
+      <p style="color: var(--mu2); font-size: 0.9rem;">&copy; 2025 Broto. Inteligência que nasce no Brasil.</p>
+    </div>
+  </footer>
+
+  <script>
+    let diagnostic = { size: 0, rev: 0, sector: 1 };
+    function goStep(current, next, key, val) {
+      diagnostic[key] = val;
+      document.getElementById('step' + current).classList.remove('active');
+      document.getElementById('step' + next).classList.add('active');
+    }
+    function finishCalc(pain) {
+      document.getElementById('step4').classList.remove('active');
+      document.getElementById('stepResult').classList.add('active');
+      const total = (diagnostic.size * 1400) + ((diagnostic.rev * 0.07) * diagnostic.sector);
+      document.getElementById('finalValue').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    function resetCalc() {
+      document.querySelectorAll('.calc-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step1').classList.add('active');
+      diagnostic = { size: 0, rev: 0, sector: 1 };
+    }
+  </script>
+</body>
+</html>
